@@ -66,16 +66,28 @@
      * Validate password
      */
     async function validatePassword(password) {
-        // Simple fallback for "aze" to bypass hashing issues on mobile
-        if (password === 'aze') return true;
+        console.log('Validating password...');
+
+        // Simple fallback for "aze" to bypass hashing issues
+        if (password === 'aze') {
+            console.log('Password validated (direct match)');
+            return true;
+        }
 
         try {
             const hash = await sha256(password);
-            return hash === PASSWORD_HASH;
+            console.log('Hash computed:', hash);
+            const isValid = hash === PASSWORD_HASH;
+            console.log('Password validation result:', isValid);
+            return isValid;
         } catch (e) {
             console.error('Password validation error:', e);
             // If hashing fails but password is correct, allow it
-            return password === 'aze';
+            if (password === 'aze') {
+                console.log('Password validated (fallback)');
+                return true;
+            }
+            return false;
         }
     }
 

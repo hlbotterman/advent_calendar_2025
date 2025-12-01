@@ -78,6 +78,9 @@
      */
     async function initCalendar() {
         try {
+            // Wait for CryptoJS to be loaded
+            await waitForCryptoJS();
+
             // Initialize DOM elements first
             initElements();
 
@@ -142,6 +145,32 @@
     }
 
     /**
+     * Wait for CryptoJS to be loaded
+     */
+    function waitForCryptoJS() {
+        return new Promise((resolve) => {
+            if (typeof CryptoJS !== 'undefined') {
+                resolve();
+            } else {
+                const checkInterval = setInterval(() => {
+                    if (typeof CryptoJS !== 'undefined') {
+                        clearInterval(checkInterval);
+                        console.log('CryptoJS loaded successfully');
+                        resolve();
+                    }
+                }, 50);
+
+                // Timeout after 5 seconds
+                setTimeout(() => {
+                    clearInterval(checkInterval);
+                    console.error('CryptoJS failed to load after 5 seconds');
+                    resolve();
+                }, 5000);
+            }
+        });
+    }
+
+    /**
      * Decrypt text using password
      */
     function decryptText(encryptedText, password) {
@@ -176,15 +205,18 @@
 
         // Get decryption key from auth
         const password = window.getDecryptionKey && window.getDecryptionKey();
+        console.log('Decryption password available:', !!password);
 
         // Decrypt texts if password is available
         if (password) {
+            console.log('Decrypting location texts...');
             return locations.map(location => ({
                 ...location,
                 text: location.text ? decryptText(location.text, password) : ''
             }));
         }
 
+        console.warn('No decryption password found, returning encrypted texts');
         return locations;
     }
 

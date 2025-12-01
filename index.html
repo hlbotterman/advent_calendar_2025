@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Advent World Postcards - Journey Around the World</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin=""/>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/styles.css?v=really_final">
+    <link rel="stylesheet" href="assets/css/passport.css">
+    <link rel="stylesheet" href="assets/css/finale.css">
+    <!-- Google Fonts for Finale -->
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Welcome Screen -->
+    <div id="welcomeScreen" class="welcome-screen">
+        <div class="welcome-container">
+            <h1 class="welcome-title">Un voyage autour du monde</h1>
+            <p class="welcome-subtitle"> </p>
+
+            <div class="comic-scene">
+                <!-- Avatar A (Left) -->
+                <div class="avatar-panel avatar-a-panel">
+                    <div class="avatar-character">
+                        <img src="assets/img/avatars/avatarA.png" alt="Avatar A" class="avatar-img">
+                    </div>
+                    <div class="speech-bubble speech-left">
+                        <p>Salut ! Je m'apprête à découvrir quelques endroits dans le monde. Tu veux voir ?</p>
+                    </div>
+                </div>
+
+                <!-- Avatar B (Right) -->
+                <div class="avatar-panel avatar-b-panel">
+                    <div class="avatar-character">
+                        <img src="assets/img/avatars/avatarB.png" alt="Avatar B" class="avatar-img">
+                    </div>
+                    <div id="avatarBSpeech">
+                        <!-- Initial Choices as Speech Bubbles -->
+                        <div id="welcomeChoices" class="welcome-choices-bubbles">
+                            <button id="btnYes" class="choice-bubble choice-yes">Oui, avec plaisir !</button>
+                            <button id="btnNo" class="choice-bubble choice-no">Non, trop naze ton idée.</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Password Protection (Hidden initially) -->
+            <div id="passwordContainer" class="password-container" style="display: none;">
+                <input
+                    type="password"
+                    id="passwordInput"
+                    class="password-input"
+                    placeholder="Entrez le mot de passe..."
+                    autocomplete="off"
+                    aria-label="Password input"
+                >
+                <button id="startJourneyBtn" class="btn-start">
+                    🌍 En avant, Milou !
+                </button>
+                <p class="password-error" id="passwordError" style="display: none;">
+                    ❌ Mot de passe incorrect
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Calendar App (initially hidden) -->
+    <div id="calendarApp" class="calendar-app" style="display: none;">
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <h1>Advent World Postcards</h1>
+            </div>
+            <div class="toolbar-right">
+                <div class="test-mode-control" id="testModeControl">
+                    <label for="testDaySlider" class="slider-label">
+                        Test Day: <span id="testDayValue">24</span>
+                    </label>
+                    <input type="range" id="testDaySlider" min="0" max="24" value="24"
+                           aria-label="Test mode day selector">
+                </div>
+                <button id="resetBtn" class="btn-reset" title="Reset opened days">
+                    🔄 Reset
+                </button>
+                <button id="passportBtn" class="btn-passport" title="Open Passport">
+                    📖
+                </button>
+                <button id="infoBtn" class="btn-info" title="Information">
+                    ℹ️
+                </button>
+                <button id="themeToggleBtn" class="btn-theme" title="Toggle Dark Mode">
+                    🌙
+                </button>
+            </div>
+        </div>
+
+        <!-- Info Modal -->
+        <div id="infoModal" class="info-modal" aria-hidden="true" style="display: none;">
+            <div class="info-modal-content">
+                <button id="closeInfoBtn" class="close-info">&times;</button>
+                <h2>Bienvenue ! 🌍</h2>
+                <div class="info-section">
+                    <h3>📍 La Carte</h3>
+                    <p>Explore le monde ! Chaque jour, un nouveau marqueur rouge apparaît. Clique dessus pour découvrir la destination et une info 100% inutile.</p>
+                </div>
+                <div class="info-section">
+                    <h3>📸 Les Photos</h3>
+                    <p>Dans chaque carte postale, clique sur les photos pour les voir en grand écran. Ce sont de vraies photos que j'ai prises, donc certaines moches, et certaines destinations remontent à très longtemps, et je ne prenais quasi pas de photos.</p>
+                </div>
+                <div class="info-section">
+                    <h3>🛂 Le Passeport</h3>
+                    <p>Clique sur le livre 📖 pour voir votre passeport. Chaque destination visitée ajoute un tampon unique !</p>
+                </div>
+                <div class="info-footer">
+                    <p>Bon voyage ! ✈️</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map Container -->
+        <div id="map" role="application" aria-label="Interactive world map with postcard locations"></div>
+
+    <!-- Postcard Panel -->
+    <aside class="postcard-panel" id="postcardPanel" aria-hidden="true">
+        <button class="close-btn" id="closeBtn" aria-label="Close postcard panel">&times;</button>
+
+        <div class="postcard-content">
+            <h2 id="postcardTitle">Location Title</h2>
+            <div class="postcard-day" id="postcardDay">Day 1</div>
+
+            <div class="postcard-image-container">
+                <button class="gallery-nav gallery-prev" id="galleryPrevBtn" aria-label="Previous image" style="display: none;">
+                    ‹
+                </button>
+                <img id="postcardImage" src="" alt="" loading="lazy">
+                <button class="gallery-nav gallery-next" id="galleryNextBtn" aria-label="Next image" style="display: none;">
+                    ›
+                </button>
+                <div class="gallery-indicator" id="galleryIndicator" style="display: none;">
+                    <span id="currentImageIndex">1</span> / <span id="totalImages">1</span>
+                </div>
+            </div>
+
+            <!-- Avatar A's Story (Comic Style) -->
+            <div class="dialogue-section">
+                <div class="avatar-message avatar-a-message">
+                    <img src="assets/img/avatars/avatarA.png" alt="Avatar A" class="message-avatar">
+                    <div class="comic-bubble bubble-a">
+                        <p id="postcardText"></p>
+                        <!-- Emoji Reactions Display -->
+                        <div class="emoji-reactions-display" id="emojiReactionsDisplay"></div>
+                        <!-- Emoji Reaction Picker -->
+                        <div class="emoji-reaction-picker">
+                            <button class="emoji-btn" data-emoji="❤️" title="Love it!">❤️</button>
+                            <button class="emoji-btn" data-emoji="😮" title="Wow!">😮</button>
+                            <button class="emoji-btn" data-emoji="😅" title="Laugh!">😅</button>
+                            <button class="emoji-btn" data-emoji="🤩" title="Amazing!">🤩</button>
+                            <button class="emoji-btn" data-emoji="🤮" title="Beurk!">🤮</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        <div class="postcard-nav">
+            <button id="prevBtn" class="btn-nav" aria-label="Previous postcard">Previous</button>
+            <button id="nextBtn" class="btn-nav" aria-label="Next postcard">Next</button>
+            <button id="finishBtn" class="btn-nav btn-finish" aria-label="Finish Journey" style="display: none;">Terminer</button>
+        </div>
+
+        <!-- Mobile-only close button at bottom -->
+        <button id="closeBtnBottom" class="close-btn-bottom" aria-label="Close postcard panel">
+            ✕ Fermer
+        </button>
+    </div>
+
+    <div class="locked-content" id="lockedContent">
+        <div class="lock-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+        </div>
+        <h3>This postcard is locked</h3>
+        <p id="lockedMessage">Come back on <span id="unlockDate"></span> to unlock this destination!</p>
+
+        <!-- Mobile-only close button at bottom for locked content -->
+        <button id="closeBtnBottomLocked" class="close-btn-bottom" aria-label="Close postcard panel">
+            ✕ Fermer
+        </button>
+    </div>
+</aside>
+
+    </div> <!-- End calendar-app -->
+
+    <!-- Lightbox for image zoom -->
+    <div id="imageLightbox" class="lightbox" aria-hidden="true">
+        <button class="lightbox-close" id="lightboxClose" aria-label="Close lightbox">&times;</button>
+        <button class="lightbox-nav lightbox-prev" id="lightboxPrev" aria-label="Previous image">‹</button>
+        <div class="lightbox-content">
+            <img id="lightboxImage" src="" alt="" class="lightbox-image">
+        </div>
+        <button class="lightbox-nav lightbox-next" id="lightboxNext" aria-label="Next image">›</button>
+        <div class="lightbox-counter" id="lightboxCounter">1 / 1</div>
+    </div>
+
+        <!-- Final Message Modal -->
+        <div id="finalMessageModal" class="final-modal" aria-hidden="true">
+            <div class="final-modal-content">
+                <div class="final-avatar">
+                    <img src="assets/img/avatars/avatarA.png" alt="Avatar A" class="final-avatar-img">
+                </div>
+                <div class="final-message-bubble">
+                    <h2 class="final-title">Voyage terminé ! 🎉</h2>
+                    <p class="final-text">J'espère que ce voyage autour du monde t'a plu !</p>
+                    <p class="final-subtext">Merci d'avoir suivi mes aventures pendant ces 24 jours.</p>
+                </div>
+                <button id="closeFinalModal" class="btn-close-final">Fermer</button>
+            </div>
+        </div>
+    </div>
+    <!-- End of calendarApp -->
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+
+    <!-- CryptoJS for text decryption -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+    <!-- Firebase JS SDK (v9 - modular) -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, set, get, update, remove, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBVgo1g3OWAVXIA9hEQ-5qNQ66PFeqzaaQ",
+            authDomain: "advent-calendar-2025.firebaseapp.com",
+            databaseURL: "https://advent-calendar-2025-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "advent-calendar-2025",
+            storageBucket: "advent-calendar-2025.firebasestorage.app",
+            messagingSenderId: "433838451261",
+            appId: "1:433838451261:web:fc011cf94fe776aa9b5854"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Make Firebase available globally
+        window.firebaseDB = {
+            ref,
+            set,
+            get,
+            update,
+            remove,
+            onValue,
+            database
+        };
+
+        console.log('Firebase initialized successfully');
+    </script>
+
+    <!-- Custom Scripts -->
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/firebase-db.js"></script>
+    <script src="assets/js/lightbox.js"></script>
+    <script src="assets/js/finale.js"></script>
+    <script src="assets/js/motion.js"></script>
+    <script src="assets/js/passport.js"></script>
+    <script src="assets/js/app.js"></script>
+</body>
+</html>

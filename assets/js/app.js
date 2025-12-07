@@ -758,10 +758,11 @@
             return location.day <= CONFIG.testModeUnlockDay;
         }
 
-        // Production mode: check actual date
-        const unlockDate = new Date(location.locked_until);
-        unlockDate.setHours(0, 0, 0, 0);
+        // Production mode: check actual date in user's local timezone
+        // Parse the unlock date as a local date (midnight in user's timezone)
+        const unlockDate = new Date(location.locked_until + 'T00:00:00');
 
+        // Get today's date at midnight in user's local timezone
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 

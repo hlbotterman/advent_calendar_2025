@@ -1,4 +1,4 @@
-/* Finale Styles - Mosaic of Memories */
+/* Finale Styles - Rapid Slideshow */
 
 .finale-overlay {
     position: fixed;
@@ -6,64 +6,91 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.9);
+    background: #000;
     z-index: 9999;
     display: none;
     overflow: hidden;
-    perspective: 1000px;
 }
 
 .finale-overlay.active {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-/* Polaroid Photo Style */
-.polaroid {
-    position: absolute;
-    background: white;
-    padding: 10px 10px 25px 10px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-    transition: all 1.5s cubic-bezier(0.25, 0.1, 0.25, 1);
-    width: 120px;
-    height: 140px;
+/* Slideshow Container */
+.slideshow-container {
+    position: relative;
+    width: 70vmin;
+    height: 70vmin;
     display: flex;
     flex-direction: column;
     align-items: center;
-    transform-origin: center;
+    justify-content: flex-start; /* Align to top */
+    transition: opacity 0.5s ease;
+}
+
+.slideshow-container.fade-out {
     opacity: 0;
-    z-index: 10;
 }
 
-.polaroid img {
+/* Slideshow Image */
+.slideshow-image {
     width: 100%;
-    height: 100px;
-    object-fit: cover;
-    background: #eee;
+    height: 60vmin; /* Fixed height */
+    object-fit: cover; /* Cover the area, crop if needed */
+    border-radius: 10px;
+    box-shadow: 0 10px 50px rgba(255,255,255,0.2);
+    opacity: 0;
+    transform: scale(0.95);
 }
 
-.polaroid-caption {
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 12px; /* Increased from 10px */
-    font-weight: bold;
-    color: #333;
-    margin-top: 8px;
+.slideshow-image.flash {
+    animation: flashIn 0.3s ease-out forwards;
+}
+
+@keyframes flashIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.02);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Caption */
+.slideshow-caption {
+    position: absolute;
+    bottom: 5vmin; /* Fixed position from bottom */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    font-size: 1.5rem;
+    color: white;
     text-align: center;
-    width: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-family: 'Helvetica Neue', sans-serif;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+    background: rgba(0,0,0,0.5);
+    padding: 10px 20px;
+    border-radius: 10px;
+    backdrop-filter: blur(5px);
 }
 
 /* Final Message */
 .finale-message {
     position: absolute;
-    bottom: 10%;
+    top: 50%;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translate(-50%, -50%);
     text-align: center;
     opacity: 0;
-    transition: opacity 2s ease;
-    z-index: 100;
+    transition: opacity 1s ease;
     pointer-events: none;
 }
 
@@ -72,24 +99,31 @@
 }
 
 .finale-title {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; /* Simpler font */
-    font-size: 4rem;
-    font-weight: 300; /* Light weight for elegance */
+    font-family: 'Great Vibes', cursive;
+    font-size: 6rem;
     color: #e74c3c;
-    text-shadow: 0 0 10px rgba(231, 76, 60, 0.5), 2px 2px 4px rgba(0,0,0,0.5);
+    text-shadow: 0 0 30px rgba(231, 76, 60, 0.8), 0 5px 15px rgba(0,0,0,0.5);
     margin: 0;
-    letter-spacing: 5px;
-    text-transform: uppercase;
-    animation: fadeIn 2s ease-in-out;
+    animation: glow 2s ease-in-out infinite alternate;
+    white-space: nowrap;
 }
 
 .finale-subtitle {
     font-family: 'Helvetica Neue', sans-serif;
-    font-size: 1.5rem;
+    font-size: 2rem;
     color: white;
-    margin-top: 10px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
+    margin-top: 20px;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+    white-space: nowrap;
+}
+
+@keyframes glow {
+    from {
+        text-shadow: 0 0 20px rgba(231, 76, 60, 0.5), 0 5px 15px rgba(0,0,0,0.5);
+    }
+    to {
+        text-shadow: 0 0 40px rgba(231, 76, 60, 1), 0 5px 15px rgba(0,0,0,0.5);
+    }
 }
 
 /* Close Button */
@@ -97,50 +131,49 @@
     position: absolute;
     top: 20px;
     right: 20px;
-    background: transparent;
+    background: rgba(255, 255, 255, 0.1);
     border: 2px solid white;
     color: white;
-    padding: 10px 20px;
+    padding: 12px 24px;
     border-radius: 30px;
     cursor: pointer;
     font-size: 16px;
+    font-weight: bold;
     opacity: 0;
     transition: all 0.3s ease;
     z-index: 200;
+    backdrop-filter: blur(10px);
 }
 
 .finale-close:hover {
     background: white;
-    color: #333;
+    color: #000;
 }
 
 .finale-close.visible {
     opacity: 1;
 }
 
-/* Animations */
-@keyframes heartbeat {
-    0% { transform: scale(1); }
-    5% { transform: scale(1.1); }
-    10% { transform: scale(1); }
-    15% { transform: scale(1.1); }
-    50% { transform: scale(1); }
-    100% { transform: scale(1); }
-}
-
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
-    .polaroid {
-        width: 80px;
-        height: 100px;
-        padding: 6px 6px 18px 6px;
+    .slideshow-container {
+        width: 90vmin;
+        height: 90vmin;
     }
     
-    .polaroid img {
-        height: 70px;
+    .slideshow-image {
+        max-height: 60vmin;
+    }
+    
+    .slideshow-caption {
+        font-size: 1.2rem;
     }
     
     .finale-title {
-        font-size: 3rem;
+        font-size: 4rem;
+    }
+    
+    .finale-subtitle {
+        font-size: 1.5rem;
     }
 }

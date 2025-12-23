@@ -66,11 +66,11 @@
      * Validate password
      */
     async function validatePassword(password) {
-        console.log('Validating password...');
+
 
         // Simple fallback for "aze" to bypass hashing issues
         if (password === 'aze') {
-            console.log('Password validated (direct match)');
+
             return true;
         }
 
@@ -84,7 +84,7 @@
             console.error('Password validation error:', e);
             // If hashing fails but password is correct, allow it
             if (password === 'aze') {
-                console.log('Password validated (fallback)');
+
                 return true;
             }
             return false;

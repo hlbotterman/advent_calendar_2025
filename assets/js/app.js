@@ -124,7 +124,7 @@
             // Setup real-time Firebase listeners
             setupRealtimeListeners();
 
-            console.log('Advent World Postcards initialized successfully');
+
         } catch (error) {
             console.error('Failed to initialize application:', error);
             console.error('Error details:', error.message);
@@ -145,7 +145,7 @@
             }
         });
 
-        console.log('Real-time Firebase listeners activated');
+
     }
 
     /**
@@ -167,7 +167,7 @@
                 const checkInterval = setInterval(() => {
                     if (typeof CryptoJS !== 'undefined') {
                         clearInterval(checkInterval);
-                        console.log('CryptoJS loaded successfully');
+
                         resolve();
                     }
                 }, 50);
@@ -217,11 +217,11 @@
 
         // Get decryption key from auth
         const password = window.getDecryptionKey && window.getDecryptionKey();
-        console.log('Decryption password available:', !!password);
+
 
         // Decrypt texts if password is available
         if (password) {
-            console.log('Decrypting location texts...');
+
             return locations.map(location => ({
                 ...location,
                 text: location.text ? decryptText(location.text, password) : ''
@@ -379,7 +379,7 @@
             btn.disabled = false;
         }, 2000);
 
-        console.log('All opened days have been reset');
+
     }
 
     /**
@@ -437,7 +437,7 @@
         const infoModal = document.getElementById('infoModal');
         const closeInfoBtn = document.getElementById('closeInfoBtn');
 
-        console.log('Initializing Info Modal', { infoBtn, infoModal });
+
 
         if (!infoBtn || !infoModal) {
             console.error('Info Modal elements not found!');
@@ -446,7 +446,7 @@
 
         // Open
         infoBtn.addEventListener('click', () => {
-            console.log('Info button clicked');
+
             infoModal.style.display = 'flex'; // Ensure flex for centering
             // Small delay for transition
             setTimeout(() => {

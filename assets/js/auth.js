@@ -76,9 +76,7 @@
 
         try {
             const hash = await sha256(password);
-            console.log('Hash computed:', hash);
             const isValid = hash === PASSWORD_HASH;
-            console.log('Password validation result:', isValid);
             return isValid;
         } catch (e) {
             console.error('Password validation error:', e);

@@ -53,6 +53,7 @@
                                     placeholder="Écris ta réponse ici..."
                                     rows="3"
                                 ></textarea>
+                                <button id="sendResponseBtn" class="btn-send-response">Envoyer</button>
                             </div>
                         </div>
                     </div>
@@ -220,6 +221,192 @@
             if (closeBtn) {
                 closeBtn.classList.add('visible');
             }
+
+            // Check if there's already a saved message
+            this.loadSavedMessage();
+
+            // Setup send button
+            const sendBtn = document.getElementById('sendResponseBtn');
+            const textarea = document.getElementById('avatarBResponse');
+            
+            if (sendBtn && textarea) {
+                sendBtn.onclick = async () => {
+                    const text = textarea.value.trim();
+                    if (text) {
+                        sendBtn.disabled = true;
+                        sendBtn.textContent = 'Envoi...';
+                        try {
+                            await window.FirebaseDB.saveAvatarBMessages(text);
+                            
+                            // Display the message persistently
+                            this.displaySentMessage(text);
+                            
+                            sendBtn.textContent = 'Envoyé !';
+                            setTimeout(() => {
+                                sendBtn.style.display = 'none';
+                            }, 1000);
+                        } catch (e) {
+                            console.error('Error saving message:', e);
+                            sendBtn.disabled = false;
+                            sendBtn.textContent = 'Erreur';
+                        }
+                    }
+                };
+            }
+        },
+
+        loadSavedMessage: async function() {
+            try {
+                const messages = await window.FirebaseDB.getAvatarBMessages();
+                if (messages && Object.keys(messages).length > 0) {
+                    // Get the most recent message
+                    const msgArray = Object.keys(messages).map(key => messages[key]);
+                    msgArray.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                    const latestMessage = msgArray[0];
+                    
+                    if (latestMessage && latestMessage.text) {
+                        this.displaySentMessage(latestMessage.text);
+                    }
+                }
+            } catch (e) {
+                console.error('Error loading saved message:', e);
+            }
+        },
+
+        displaySentMessage: function(text) {
+            const bubble = this.overlay.querySelector('.bubble-b');
+            if (bubble) {
+                bubble.innerHTML = `
+                    <p class="sent-message">${this.escapeHtml(text)}</p>
+                    <div class="message-actions">
+                        <button id="editResponseBtn" class="btn-edit-response">Modifier</button>
+                        <button id="deleteResponseBtn" class="btn-delete-response">Supprimer</button>
+                    </div>
+                `;
+                
+                // Setup edit button
+                const editBtn = document.getElementById('editResponseBtn');
+                if (editBtn) {
+                    editBtn.onclick = () => {
+                        this.showEditForm(text);
+                    };
+                }
+                
+                // Setup delete button
+                const deleteBtn = document.getElementById('deleteResponseBtn');
+                if (deleteBtn) {
+                    deleteBtn.onclick = () => {
+                        this.deleteMessage();
+                    };
+                }
+            }
+        },
+
+        showEditForm: function(currentText) {
+            const bubble = this.overlay.querySelector('.bubble-b');
+            if (bubble) {
+                bubble.innerHTML = `
+                    <textarea 
+                        id="avatarBResponse" 
+                        placeholder="Écris ta réponse ici..."
+                        rows="3"
+                    >${this.escapeHtml(currentText)}</textarea>
+                    <button id="sendResponseBtn" class="btn-send-response">Envoyer</button>
+                `;
+                
+                // Setup send button again
+                const sendBtn = document.getElementById('sendResponseBtn');
+                const textarea = document.getElementById('avatarBResponse');
+                
+                if (sendBtn && textarea) {
+                    sendBtn.onclick = async () => {
+                        const text = textarea.value.trim();
+                        if (text) {
+                            sendBtn.disabled = true;
+                            sendBtn.textContent = 'Envoi...';
+                            try {
+                                await window.FirebaseDB.saveAvatarBMessages(text);
+                                
+                                // Display the message persistently
+                                this.displaySentMessage(text);
+                                
+                                sendBtn.textContent = 'Envoyé !';
+                            } catch (e) {
+                                console.error('Error saving message:', e);
+                                sendBtn.disabled = false;
+                                sendBtn.textContent = 'Erreur';
+                            }
+                        }
+                    };
+                }
+            }
+        },
+
+        deleteMessage: async function() {
+            if (confirm('Voulez-vous vraiment supprimer votre message ?')) {
+                try {
+                    // Clear all messages from Firebase
+                    const messages = await window.FirebaseDB.getAvatarBMessages();
+                    if (messages) {
+                        // Remove all messages
+                        const { ref, remove, database } = window.firebaseDB;
+                        const messagesRef = ref(database, 'avatarBMessages');
+                        await remove(messagesRef);
+                    }
+                    
+                    // Show empty form
+                    this.showEmptyForm();
+                } catch (e) {
+                    console.error('Error deleting message:', e);
+                    alert('Erreur lors de la suppression du message');
+                }
+            }
+        },
+
+        showEmptyForm: function() {
+            const bubble = this.overlay.querySelector('.bubble-b');
+            if (bubble) {
+                bubble.innerHTML = `
+                    <textarea 
+                        id="avatarBResponse" 
+                        placeholder="Écris ta réponse ici..."
+                        rows="3"
+                    ></textarea>
+                    <button id="sendResponseBtn" class="btn-send-response">Envoyer</button>
+                `;
+                
+                // Setup send button
+                const sendBtn = document.getElementById('sendResponseBtn');
+                const textarea = document.getElementById('avatarBResponse');
+                
+                if (sendBtn && textarea) {
+                    sendBtn.onclick = async () => {
+                        const text = textarea.value.trim();
+                        if (text) {
+                            sendBtn.disabled = true;
+                            sendBtn.textContent = 'Envoi...';
+                            try {
+                                await window.FirebaseDB.saveAvatarBMessages(text);
+                                
+                                // Display the message persistently
+                                this.displaySentMessage(text);
+                                
+                                sendBtn.textContent = 'Envoyé !';
+                            } catch (e) {
+                                console.error('Error saving message:', e);
+                                sendBtn.disabled = false;
+                                sendBtn.textContent = 'Erreur';
+                            }
+                        }
+                    };
+                }
+            }
+        },
+
+        escapeHtml: function(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         },
 
         closeFinale: function() {

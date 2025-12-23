@@ -241,7 +241,7 @@
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getDatabase, ref, set, get, update, remove, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+        import { getDatabase, ref, set, get, update, remove, onValue, push } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -266,10 +266,9 @@
             update,
             remove,
             onValue,
+            push,
             database
         };
-
-        console.log('Firebase initialized successfully');
     </script>
 
     <!-- Custom Scripts -->

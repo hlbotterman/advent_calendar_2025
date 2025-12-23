@@ -36,13 +36,16 @@
         },
 
         /**
-         * Save Avatar B messages to Firebase
+         * Save a new Avatar B message to Firebase
          */
-        async saveAvatarBMessages(messages) {
+        async saveAvatarBMessages(messageText) {
             await waitForFirebase();
-            const { ref, set, database } = window.firebaseDB;
+            const { ref, push, database } = window.firebaseDB;
             const messagesRef = ref(database, 'avatarBMessages');
-            await set(messagesRef, messages);
+            await push(messagesRef, {
+                text: messageText,
+                timestamp: Date.now()
+            });
         },
 
         /**

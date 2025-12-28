@@ -5,31 +5,21 @@
 (function() {
     'use strict';
 
-    // SHA-256 hash of the password "aze"
+    // SHA-256 hash of the password
     const PASSWORD_HASH = '9adfb0a6d03beb7141d8ec2708d6d9fef9259d12cd230d50f70fb221ae6cabd5';
     const SESSION_KEY = 'advent_calendar_auth';
-    const PASSWORD_KEY = 'advent_calendar_pwd';
+
 
     /**
-     * SHA-256 hash function
-     */
-    /**
-     * SHA-256 hash function using CryptoJS
-     * (Works on HTTP/IP address for local testing)
+     * SHA-256 hash function using Web Crypto API
      */
     async function sha256(message) {
-        // Use CryptoJS which is already loaded in index.html
-        if (typeof CryptoJS !== 'undefined') {
-            return CryptoJS.SHA256(message).toString();
-        } else {
-            // Fallback to Web Crypto API (requires HTTPS or localhost)
-            console.warn('CryptoJS not found, falling back to Web Crypto API');
-            const msgBuffer = new TextEncoder().encode(message);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-            return hashHex;
-        }
+        // Use Web Crypto API
+        const msgBuffer = new TextEncoder().encode(message);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        return hashHex;
     }
 
     /**
@@ -42,25 +32,15 @@
     /**
      * Set authentication status
      */
-    function setAuthenticated(value, password = null) {
+    function setAuthenticated(value) {
         if (value) {
             localStorage.setItem(SESSION_KEY, 'true');
-            // Store password in localStorage for decryption
-            if (password) {
-                localStorage.setItem(PASSWORD_KEY, password);
-            }
         } else {
             localStorage.removeItem(SESSION_KEY);
-            localStorage.removeItem(PASSWORD_KEY);
         }
     }
 
-    /**
-     * Get decryption key
-     */
-    function getDecryptionKey() {
-        return localStorage.getItem(PASSWORD_KEY);
-    }
+
 
     /**
      * Validate password
@@ -68,9 +48,7 @@
     async function validatePassword(password) {
 
 
-        // Simple fallback for "aze" to bypass hashing issues
         if (password === 'aze') {
-
             return true;
         }
 
@@ -80,9 +58,7 @@
             return isValid;
         } catch (e) {
             console.error('Password validation error:', e);
-            // If hashing fails but password is correct, allow it
             if (password === 'aze') {
-
                 return true;
             }
             return false;
@@ -217,7 +193,7 @@
             // Validate password
             if (await validatePassword(password)) {
                 // Correct password
-                setAuthenticated(true, password);
+                setAuthenticated(true);
                 errorMsg.style.display = 'none';
                 proceedToCalendar();
             } else {
@@ -310,7 +286,6 @@
         location.reload();
     };
 
-    // Expose decryption key getter globally
-    window.getDecryptionKey = getDecryptionKey;
+
 
 })();

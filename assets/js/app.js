@@ -47,7 +47,6 @@
 
     /**
      * Setup welcome screen
-     * Note: Password handling is now done by auth.js
      */
     function setupWelcomeScreen() {
         // Listen for the custom event triggered after successful authentication
@@ -90,9 +89,6 @@
      */
     async function initCalendar() {
         try {
-            // Wait for CryptoJS to be loaded
-            await waitForCryptoJS();
-
             // Initialize DOM elements first
             initElements();
 
@@ -105,7 +101,7 @@
             // Create markers for all locations
             createMarkers();
 
-            // Avatars removed - only day markers on the map
+
 
             // Setup event listeners
             setupEventListeners();
@@ -156,52 +152,7 @@
         setupWelcomeScreen();
     }
 
-    /**
-     * Wait for CryptoJS to be loaded
-     */
-    function waitForCryptoJS() {
-        return new Promise((resolve) => {
-            if (typeof CryptoJS !== 'undefined') {
-                resolve();
-            } else {
-                const checkInterval = setInterval(() => {
-                    if (typeof CryptoJS !== 'undefined') {
-                        clearInterval(checkInterval);
 
-                        resolve();
-                    }
-                }, 50);
-
-                // Timeout after 5 seconds
-                setTimeout(() => {
-                    clearInterval(checkInterval);
-                    console.error('CryptoJS failed to load after 5 seconds');
-                    resolve();
-                }, 5000);
-            }
-        });
-    }
-
-    /**
-     * Decrypt text using password
-     */
-    function decryptText(encryptedText, password) {
-        if (!encryptedText || !password) return '';
-
-        if (typeof CryptoJS === 'undefined') {
-            console.error('CryptoJS is not loaded!');
-            return encryptedText;
-        }
-
-        try {
-            const bytes = CryptoJS.AES.decrypt(encryptedText, password);
-            const decrypted = bytes.toString(CryptoJS.enc.Utf8);
-            return decrypted || encryptedText; // Return original if decryption fails
-        } catch (error) {
-            console.error('Decryption error:', error);
-            return encryptedText; // Return original text if error
-        }
-    }
 
     /**
      * Load locations from JSON and decrypt texts
@@ -213,23 +164,7 @@
         if (!response.ok) {
             throw new Error('Failed to load locations data');
         }
-        const locations = await response.json();
-
-        // Get decryption key from auth
-        const password = window.getDecryptionKey && window.getDecryptionKey();
-
-
-        // Decrypt texts if password is available
-        if (password) {
-
-            return locations.map(location => ({
-                ...location,
-                text: location.text ? decryptText(location.text, password) : ''
-            }));
-        }
-
-        console.warn('No decryption password found, returning encrypted texts');
-        return locations;
+        return await response.json();
     }
 
     /**
@@ -427,7 +362,7 @@
         });
     }
 
-    // Avatar markers and motion removed - only day markers on map now
+
 
     /**
      * Initialize Info Modal
@@ -574,14 +509,7 @@
         }
     }
 
-    /**
-     * Load Avatar B's message - Empty function (feature removed)
-     */
-    async function loadAvatarBMessage(day) {
-        // Avatar B messages feature has been removed
-        // This function is kept for compatibility but does nothing
-        return;
-    }
+
 
     /**
      * Get all emoji reactions from Firebase
@@ -823,8 +751,7 @@
         // Setup image gallery
         setupImageGallery(location);
 
-        // Load Avatar B's message for this day
-        loadAvatarBMessage(location.day);
+
 
         // Load emoji reactions for this day
         displayEmojiReactions(location.day);

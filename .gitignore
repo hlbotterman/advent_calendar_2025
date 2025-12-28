@@ -23,9 +23,7 @@ Desktop.ini
 *.tmp
 *.temp
 
-# Encryption and admin tools
-encrypt-texts.html
-assets/data/locations-with-texts.json
+
 
 # docs
 docs/
